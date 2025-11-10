@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ScenarioPicker, Button, ProgressStats } from '@/components';
+import {
+  ScenarioPicker,
+  Button,
+  ProgressStats,
+  ScenarioCardSkeleton,
+  ProgressStatsSkeleton
+} from '@/components';
 import { useScenarios, useAuth, useUserProgress } from '@/hooks';
 import type { Scenario } from '@/types';
 
@@ -20,15 +26,6 @@ export default function HomeScreen() {
     });
   };
 
-  if (scenariosLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#6366f1" />
-        <Text className="mt-4 text-gray-600">Loading scenarios...</Text>
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView className="flex-1">
@@ -43,19 +40,27 @@ export default function HomeScreen() {
         </View>
 
         {/* Progress Stats */}
-        {progress && !progressLoading && (
-          <View className="px-4 -mt-6 mb-4">
+        <View className="px-4 -mt-6 mb-4">
+          {progressLoading ? (
+            <ProgressStatsSkeleton />
+          ) : progress ? (
             <ProgressStats
               currentStreak={progress.current_streak}
               totalSessions={progress.total_sessions}
               averageScores={progress.average_scores}
             />
-          </View>
-        )}
+          ) : null}
+        </View>
 
         {/* Scenario Picker */}
         <View className="mb-4">
-          {scenarios && scenarios.length > 0 ? (
+          {scenariosLoading ? (
+            <View className="px-4">
+              <ScenarioCardSkeleton />
+              <ScenarioCardSkeleton />
+              <ScenarioCardSkeleton />
+            </View>
+          ) : scenarios && scenarios.length > 0 ? (
             <ScenarioPicker
               scenarios={scenarios}
               selectedScenario={selectedScenario}

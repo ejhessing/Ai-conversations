@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { simulateReply, createSession, updateSession } from '@/services/api';
 import type { ConversationMessage, Scenario } from '@/types';
@@ -7,6 +7,7 @@ export function useConversation(scenario: Scenario | undefined, userId: string |
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const sessionStartTime = useRef<number | null>(null);
 
   // Create session mutation
   const createSessionMutation = useMutation({
@@ -16,6 +17,7 @@ export function useConversation(scenario: Scenario | undefined, userId: string |
     },
     onSuccess: (session) => {
       setSessionId(session.id);
+      sessionStartTime.current = Date.now(); // Track session start time
       // Add initial AI message from scenario
       if (scenario?.script_seed) {
         const initialMessage: ConversationMessage = {
@@ -117,20 +119,40 @@ export function useConversation(scenario: Scenario | undefined, userId: string |
     }
   };
 
-  const endConversation = () => {
+  const getSessionDuration = () => {
+    if (!sessionStartTime.current) return 0;
+    return Math.floor((Date.now() - sessionStartTime.current) / 1000);
+  };
+
+  const endConversation = async () => {
     setIsActive(false);
+
+    // Update session with final duration
+    if (sessionId && sessionStartTime.current) {
+      const durationSeconds = getSessionDuration();
+      try {
+        await updateSession(sessionId, {
+          duration_seconds: durationSeconds,
+        });
+      } catch (error) {
+        console.error('Failed to update session duration:', error);
+        // Don't throw - non-critical
+      }
+    }
   };
 
   const resetConversation = () => {
     setMessages([]);
     setSessionId(null);
     setIsActive(false);
+    sessionStartTime.current = null;
   };
 
   return {
     messages,
     sessionId,
     isActive,
+    sessionDuration: getSessionDuration(),
     startConversation,
     sendMessage,
     endConversation,

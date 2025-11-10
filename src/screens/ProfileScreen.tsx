@@ -1,7 +1,13 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Button, ProgressChart } from '@/components';
+import {
+  Button,
+  ProgressChart,
+  ProgressChartSkeleton,
+  ProgressStatsSkeleton,
+  SessionHistorySkeleton
+} from '@/components';
 import { useAuth, useUserProgress } from '@/hooks';
 import { fetchUserMetrics } from '@/services/api';
 import { useQuery } from '@tanstack/react-query';
@@ -9,9 +15,9 @@ import { useQuery } from '@tanstack/react-query';
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { data: progress } = useUserProgress(user?.id);
+  const { data: progress, isLoading: progressLoading } = useUserProgress(user?.id);
 
-  const { data: metrics } = useQuery({
+  const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['metrics', user?.id],
     queryFn: () => fetchUserMetrics(user!.id),
     enabled: !!user?.id,
@@ -61,8 +67,21 @@ export default function ProfileScreen() {
       </View>
 
       {/* Stats Overview */}
-      {progress && (
-        <View className="px-4 -mt-6 mb-4">
+      <View className="px-4 -mt-6 mb-4">
+        {progressLoading ? (
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
+            <View className="flex-row justify-around">
+              {[1, 2, 3].map((i) => (
+                <View key={i} className="items-center">
+                  <View className="mb-1">
+                    <View className="bg-gray-300 rounded h-9 w-12" />
+                  </View>
+                  <View className="bg-gray-300 rounded h-4 w-20 mt-1" />
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : progress ? (
           <View className="bg-white rounded-2xl p-6 shadow-sm">
             <View className="flex-row justify-around">
               <View className="items-center">
@@ -85,23 +104,31 @@ export default function ProfileScreen() {
               </View>
             </View>
           </View>
-        </View>
-      )}
+        ) : null}
+      </View>
 
       {/* Weekly Progress Chart */}
-      {metrics && metrics.length > 0 && (
-        <View className="px-4 mb-4">
+      <View className="px-4 mb-4">
+        {metricsLoading ? (
+          <ProgressChartSkeleton />
+        ) : metrics && metrics.length > 0 ? (
           <ProgressChart
             data={weeklyData}
             title="Weekly Clarity Trend"
             yAxisSuffix=""
           />
-        </View>
-      )}
+        ) : null}
+      </View>
 
       {/* Recent Sessions */}
-      {progress && progress.recent_sessions && progress.recent_sessions.length > 0 && (
-        <View className="px-4 mb-4">
+      <View className="px-4 mb-4">
+        {progressLoading ? (
+          <View>
+            <SessionHistorySkeleton />
+            <SessionHistorySkeleton />
+            <SessionHistorySkeleton />
+          </View>
+        ) : progress && progress.recent_sessions && progress.recent_sessions.length > 0 ? (
           <View className="bg-white rounded-2xl p-4 shadow-sm">
             <Text className="text-lg font-semibold text-gray-900 mb-3">
               Recent Sessions
@@ -124,8 +151,8 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-      )}
+        ) : null}
+      </View>
 
       {/* Account Actions */}
       <View className="px-4 mb-8">

@@ -22,6 +22,7 @@ export default function RoleplayScreen() {
     messages,
     sessionId,
     isActive,
+    sessionDuration,
     startConversation,
     sendMessage,
     endConversation,
@@ -96,12 +97,21 @@ export default function RoleplayScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'End & Get Feedback',
-          onPress: () => {
-            endConversation();
-            router.push({
-              pathname: '/feedback',
-              params: { sessionId },
-            });
+          onPress: async () => {
+            try {
+              await endConversation();
+              router.push({
+                pathname: '/feedback',
+                params: { sessionId },
+              });
+            } catch (error) {
+              console.error('Error ending session:', error);
+              // Navigate anyway - feedback generation will handle missing duration
+              router.push({
+                pathname: '/feedback',
+                params: { sessionId },
+              });
+            }
           },
         },
       ]

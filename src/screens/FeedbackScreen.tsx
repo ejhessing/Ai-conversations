@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, Text, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Alert, Share, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { FeedbackCard, Button } from '@/components';
+import { FeedbackCard, Button, FeedbackCardSkeleton } from '@/components';
 import { useFeedback } from '@/hooks';
 import { fetchUserSessions } from '@/services/api';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/config/supabase';
+import { generateFeedbackSummary, generateMarkdownReport } from '@/utils';
 
 export default function FeedbackScreen() {
   const router = useRouter();
@@ -56,14 +57,52 @@ export default function FeedbackScreen() {
     router.push('/');
   };
 
+  const handleShare = async () => {
+    if (!feedback) return;
+
+    try {
+      const summary = generateFeedbackSummary(feedback, session);
+
+      await Share.share({
+        message: summary,
+        title: 'My AI Conversation Coach Feedback',
+      });
+    } catch (error) {
+      console.error('Error sharing feedback:', error);
+      // Share was cancelled or failed, don't show error alert
+    }
+  };
+
+  const handleExportDetailed = async () => {
+    if (!feedback) return;
+
+    try {
+      const report = generateMarkdownReport(feedback, session);
+
+      await Share.share({
+        message: report,
+        title: 'Detailed Feedback Report',
+      });
+    } catch (error) {
+      console.error('Error exporting detailed report:', error);
+    }
+  };
+
   if (isLoading || !feedback) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <ActivityIndicator size="large" color="#6366f1" />
-        <Text className="mt-4 text-gray-600">Analyzing your performance...</Text>
-        <Text className="mt-2 text-gray-500 text-sm px-8 text-center">
-          Our AI is reviewing your conversation to provide personalized feedback
-        </Text>
+      <View className="flex-1 bg-gray-50">
+        {/* Header */}
+        <View className="bg-primary-500 pt-12 pb-6 px-6">
+          <Text className="text-white text-2xl font-bold">Your Feedback</Text>
+          <Text className="text-white/90 text-sm mt-1">
+            Analyzing your performance...
+          </Text>
+        </View>
+
+        {/* Skeleton */}
+        <ScrollView>
+          <FeedbackCardSkeleton />
+        </ScrollView>
       </View>
     );
   }
@@ -97,6 +136,24 @@ export default function FeedbackScreen() {
 
       {/* Action Buttons */}
       <View className="p-4 bg-white border-t border-gray-200 space-y-2">
+        <View className="flex-row gap-2 mb-2">
+          <View className="flex-1">
+            <Button
+              title="Share Summary"
+              onPress={handleShare}
+              variant="outline"
+              size="medium"
+            />
+          </View>
+          <View className="flex-1">
+            <Button
+              title="Export Full Report"
+              onPress={handleExportDetailed}
+              variant="outline"
+              size="medium"
+            />
+          </View>
+        </View>
         <Button
           title="Practice Another Scenario"
           onPress={handlePracticeAgain}
