@@ -18,39 +18,50 @@ interface ProgressChartProps {
 export function ProgressChart({ data, title, yAxisSuffix = '' }: ProgressChartProps) {
   const screenWidth = Dimensions.get('window').width - 32; // 32 for padding
 
+  // Validate data before rendering chart
+  const hasValidData = data.labels.length > 0 &&
+    data.datasets.length > 0 &&
+    data.datasets[0].data.length > 0;
+
   return (
     <View className="bg-white rounded-2xl p-4 shadow-sm mb-4">
       <Text className="text-lg font-semibold text-gray-900 mb-3">
         {title}
       </Text>
 
-      <LineChart
-        data={data}
-        width={screenWidth - 32}
-        height={220}
-        yAxisSuffix={yAxisSuffix}
-        chartConfig={{
-          backgroundColor: '#ffffff',
-          backgroundGradientFrom: '#ffffff',
-          backgroundGradientTo: '#ffffff',
-          decimalPlaces: 1,
-          color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
-          style: {
+      {hasValidData ? (
+        <LineChart
+          data={data}
+          width={screenWidth - 32}
+          height={220}
+          yAxisSuffix={yAxisSuffix}
+          chartConfig={{
+            backgroundColor: '#ffffff',
+            backgroundGradientFrom: '#ffffff',
+            backgroundGradientTo: '#ffffff',
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+            propsForDots: {
+              r: '6',
+              strokeWidth: '2',
+              stroke: '#6366f1',
+            },
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
             borderRadius: 16,
-          },
-          propsForDots: {
-            r: '6',
-            strokeWidth: '2',
-            stroke: '#6366f1',
-          },
-        }}
-        bezier
-        style={{
-          marginVertical: 8,
-          borderRadius: 16,
-        }}
-      />
+          }}
+        />
+      ) : (
+        <View className="h-[220px] items-center justify-center">
+          <Text className="text-gray-500">No data available yet</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -120,15 +131,19 @@ interface ScoreBarProps {
 }
 
 function ScoreBar({ label, score }: ScoreBarProps) {
-  const percentage = (score / 10) * 100;
+  // Handle invalid scores
+  const validScore = typeof score === 'number' && !isNaN(score) ? score : 0;
+  const clampedScore = Math.max(0, Math.min(10, validScore)); // Clamp between 0-10
+
+  const percentage = (clampedScore / 10) * 100;
   const barColor =
-    score >= 8 ? 'bg-green-500' : score >= 6 ? 'bg-yellow-500' : 'bg-red-500';
+    clampedScore >= 8 ? 'bg-green-500' : clampedScore >= 6 ? 'bg-yellow-500' : 'bg-red-500';
 
   return (
     <View>
       <View className="flex-row justify-between mb-1">
         <Text className="text-gray-700 font-medium">{label}</Text>
-        <Text className="text-gray-900 font-bold">{score.toFixed(1)}/10</Text>
+        <Text className="text-gray-900 font-bold">{clampedScore.toFixed(1)}/10</Text>
       </View>
       <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <View

@@ -12,10 +12,10 @@ import type {
   Metrics,
 } from '@/types';
 
-const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL?.replace(
-  'https://',
-  'https://'
-).replace('.supabase.co', '.supabase.co/functions/v1');
+// Construct the Edge Functions URL from the Supabase URL
+const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL
+  ? `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`
+  : '';
 
 /**
  * Helper to call Supabase Edge Functions with authentication
@@ -30,6 +30,10 @@ async function callEdgeFunction<T>(
     throw new Error('Not authenticated');
   }
 
+  if (!FUNCTIONS_URL) {
+    throw new Error('Supabase Functions URL not configured');
+  }
+
   const response = await fetch(`${FUNCTIONS_URL}/${functionName}`, {
     method: 'POST',
     headers: {
@@ -40,11 +44,22 @@ async function callEdgeFunction<T>(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || `Failed to call ${functionName}`);
+    // Safely handle error response parsing
+    try {
+      const error = await response.json();
+      throw new Error(error.error || `Failed to call ${functionName}`);
+    } catch (parseError) {
+      // If JSON parsing fails, use status text
+      throw new Error(`Failed to call ${functionName}: ${response.statusText}`);
+    }
   }
 
-  return response.json();
+  // Safely parse successful response
+  try {
+    return await response.json();
+  } catch (parseError) {
+    throw new Error(`Failed to parse response from ${functionName}`);
+  }
 }
 
 // ==================== Audio Transcription ====================
@@ -186,14 +201,31 @@ export async function fetchUserProgress(userId: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Get unique days with sessions
     const uniqueDays = new Set(
       sessionsData.map(s => new Date(s.created_at).toDateString())
     );
 
+    // Check if user practiced today or yesterday (streak is still active if they practiced yesterday)
     let checkDate = new Date(today);
-    while (uniqueDays.has(checkDate.toDateString())) {
-      currentStreak++;
+    const hasToday = uniqueDays.has(checkDate.toDateString());
+
+    if (!hasToday) {
+      // If no practice today, check yesterday to see if streak is still active
       checkDate.setDate(checkDate.getDate() - 1);
+      if (!uniqueDays.has(checkDate.toDateString())) {
+        // Streak is broken - no practice today or yesterday
+        currentStreak = 0;
+      }
+    }
+
+    // Count consecutive days backwards
+    if (currentStreak !== 0 || hasToday) {
+      checkDate = new Date(today);
+      while (uniqueDays.has(checkDate.toDateString())) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
     }
   }
 

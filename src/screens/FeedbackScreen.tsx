@@ -45,7 +45,8 @@ export default function FeedbackScreen() {
     };
 
     generateIfNeeded();
-  }, [session, feedback, isLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, feedback, isLoading]); // generateFeedback is stable from mutation
 
   const handleGoHome = () => {
     router.push('/');

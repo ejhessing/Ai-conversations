@@ -67,27 +67,53 @@ export function useConversation(scenario: Scenario | undefined, userId: string |
       content,
       timestamp: new Date(),
     };
-    setMessages((prev) => [...prev, userMessage]);
 
-    // Get AI response
-    await simulateReplyMutation.mutateAsync(content);
+    // Track updated messages to avoid stale state
+    let updatedMessages: ConversationMessage[] = [];
+    setMessages((prev) => {
+      updatedMessages = [...prev, userMessage];
+      return updatedMessages;
+    });
 
-    // Update session with new transcript
-    if (sessionId) {
-      const userTranscript = messages
-        .filter(m => m.role === 'user')
-        .map(m => m.content)
-        .join('\n') + '\n' + content;
+    try {
+      // Get AI response
+      const response = await simulateReplyMutation.mutateAsync(content);
 
-      const aiTranscript = messages
-        .filter(m => m.role === 'ai')
-        .map(m => m.content)
-        .join('\n');
+      // Update local messages with AI response (mutation already does this, but we track it)
+      const aiMessage: ConversationMessage = {
+        id: `ai-${Date.now()}`,
+        role: 'ai',
+        content: response.ai_message,
+        timestamp: new Date(),
+        audio_url: response.audio_url,
+      };
+      updatedMessages = [...updatedMessages, aiMessage];
 
-      await updateSession(sessionId, {
-        transcript: userTranscript,
-        ai_transcript: aiTranscript,
-      });
+      // Update session with complete transcript including new messages
+      if (sessionId) {
+        const userTranscript = updatedMessages
+          .filter(m => m.role === 'user')
+          .map(m => m.content)
+          .join('\n');
+
+        const aiTranscript = updatedMessages
+          .filter(m => m.role === 'ai')
+          .map(m => m.content)
+          .join('\n');
+
+        try {
+          await updateSession(sessionId, {
+            transcript: userTranscript,
+            ai_transcript: aiTranscript,
+          });
+        } catch (updateError) {
+          console.error('Failed to update session transcript:', updateError);
+          // Don't throw - this is not critical to user experience
+        }
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      throw error; // Re-throw so caller can handle
     }
   };
 

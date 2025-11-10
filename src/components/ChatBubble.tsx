@@ -10,6 +10,7 @@ interface ChatBubbleProps {
 export function ChatBubble({ message }: ChatBubbleProps) {
   const [sound, setSound] = React.useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [audioError, setAudioError] = React.useState(false);
 
   const isUser = message.role === 'user';
 
@@ -17,8 +18,10 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     if (!message.audio_url) return;
 
     try {
+      setAudioError(false);
+
       if (sound) {
-        await sound.unloadAsync();
+        await sound.unloadAsync().catch(() => {});
       }
 
       const { sound: newSound } = await Audio.Sound.createAsync(
@@ -36,13 +39,17 @@ export function ChatBubble({ message }: ChatBubbleProps) {
       });
     } catch (error) {
       console.error('Error playing audio:', error);
+      setAudioError(true);
+      setIsPlaying(false);
     }
   };
 
   React.useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync();
+          sound.unloadAsync().catch((error) => {
+            console.error('Error unloading audio:', error);
+          });
         }
       : undefined;
   }, [sound]);
@@ -70,14 +77,15 @@ export function ChatBubble({ message }: ChatBubbleProps) {
           <TouchableOpacity
             onPress={playAudio}
             className="mt-2 flex-row items-center"
+            disabled={audioError}
           >
             <View className={`w-6 h-6 rounded-full ${isUser ? 'bg-white/20' : 'bg-gray-300'} items-center justify-center`}>
               <Text className={isUser ? 'text-white' : 'text-gray-700'}>
-                {isPlaying ? '⏸' : '▶'}
+                {isPlaying ? '⏸' : audioError ? '✕' : '▶'}
               </Text>
             </View>
             <Text className={`ml-2 text-sm ${isUser ? 'text-white/80' : 'text-gray-600'}`}>
-              {isPlaying ? 'Playing...' : 'Play audio'}
+              {isPlaying ? 'Playing...' : audioError ? 'Audio unavailable' : 'Play audio'}
             </Text>
           </TouchableOpacity>
         )}
@@ -87,10 +95,25 @@ export function ChatBubble({ message }: ChatBubbleProps) {
             isUser ? 'text-white/70' : 'text-gray-500'
           }`}
         >
-          {message.timestamp.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
+          {(() => {
+            try {
+              // Validate timestamp is a valid Date
+              const timestamp = message.timestamp instanceof Date
+                ? message.timestamp
+                : new Date(message.timestamp);
+
+              if (isNaN(timestamp.getTime())) {
+                return 'Just now';
+              }
+
+              return timestamp.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+            } catch {
+              return 'Just now';
+            }
+          })()}
         </Text>
       </View>
     </View>

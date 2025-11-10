@@ -23,6 +23,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       // Redirect to home if authenticated
       router.replace('/');
     }
+    // router is stable from expo-router useRouter hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, segments]);
 
   if (loading) {

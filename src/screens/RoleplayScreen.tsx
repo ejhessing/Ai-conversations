@@ -56,8 +56,13 @@ export default function RoleplayScreen() {
   const handleSendText = async () => {
     if (!textInput.trim()) return;
 
-    await sendMessage(textInput);
-    setTextInput('');
+    try {
+      await sendMessage(textInput);
+      setTextInput('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      Alert.alert('Error', 'Failed to send message. Please try again.');
+    }
   };
 
   const handleStopRecording = async () => {
@@ -79,6 +84,11 @@ export default function RoleplayScreen() {
   };
 
   const handleEndSession = () => {
+    if (!sessionId) {
+      Alert.alert('Error', 'No active session found');
+      return;
+    }
+
     Alert.alert(
       'End Session',
       'Are you ready to end this practice session and get feedback?',
@@ -90,7 +100,7 @@ export default function RoleplayScreen() {
             endConversation();
             router.push({
               pathname: '/feedback',
-              params: { sessionId: sessionId! },
+              params: { sessionId },
             });
           },
         },
@@ -195,10 +205,30 @@ export default function RoleplayScreen() {
               <View>
                 <AudioRecorder
                   recordingState={recordingState}
-                  onStart={startRecording}
+                  onStart={async () => {
+                    try {
+                      await startRecording();
+                    } catch (error) {
+                      console.error('Failed to start recording:', error);
+                      Alert.alert('Error', 'Failed to start recording. Please check microphone permissions.');
+                    }
+                  }}
                   onStop={handleStopRecording}
-                  onPause={pauseRecording}
-                  onResume={resumeRecording}
+                  onPause={async () => {
+                    try {
+                      await pauseRecording();
+                    } catch (error) {
+                      console.error('Failed to pause recording:', error);
+                    }
+                  }}
+                  onResume={async () => {
+                    try {
+                      await resumeRecording();
+                    } catch (error) {
+                      console.error('Failed to resume recording:', error);
+                      Alert.alert('Error', 'Failed to resume recording. Please try again.');
+                    }
+                  }}
                   isTranscribing={transcribing}
                 />
               </View>

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { useMutation } from '@tanstack/react-query';
@@ -14,6 +14,20 @@ export function useTranscription() {
 
   const recordingRef = useRef<Audio.Recording | null>(null);
   const durationInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up interval
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+      }
+      // Clean up recording
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(console.error);
+      }
+    };
+  }, []);
 
   // Transcription mutation
   const transcribeMutation = useMutation({
@@ -32,6 +46,18 @@ export function useTranscription() {
 
   const startRecording = async () => {
     try {
+      // Clean up any existing recording first
+      if (recordingRef.current) {
+        await recordingRef.current.stopAndUnloadAsync().catch(() => {});
+        recordingRef.current = null;
+      }
+
+      // Clear any existing interval
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+        durationInterval.current = null;
+      }
+
       // Request permissions
       const permission = await Audio.requestPermissionsAsync();
       if (!permission.granted) {
@@ -65,6 +91,20 @@ export function useTranscription() {
 
     } catch (error) {
       console.error('Failed to start recording:', error);
+      // Clean up on error
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+        durationInterval.current = null;
+      }
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(() => {});
+        recordingRef.current = null;
+      }
+      setRecordingState({
+        isRecording: false,
+        isPaused: false,
+        duration: 0,
+      });
       throw error;
     }
   };
