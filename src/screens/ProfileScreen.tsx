@@ -1,0 +1,156 @@
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Button, ProgressChart } from '@/components';
+import { useAuth, useUserProgress } from '@/hooks';
+import { fetchUserMetrics } from '@/services/api';
+import { useQuery } from '@tanstack/react-query';
+
+export default function ProfileScreen() {
+  const router = useRouter();
+  const { user, signOut } = useAuth();
+  const { data: progress } = useUserProgress(user?.id);
+
+  const { data: metrics } = useQuery({
+    queryKey: ['metrics', user?.id],
+    queryFn: () => fetchUserMetrics(user!.id),
+    enabled: !!user?.id,
+  });
+
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut();
+            router.replace('/auth');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to sign out');
+          }
+        },
+      },
+    ]);
+  };
+
+  // Prepare chart data
+  const weeklyData = metrics
+    ? {
+        labels: metrics.slice(0, 6).reverse().map((m) => {
+          const date = new Date(m.week_start);
+          return `${date.getMonth() + 1}/${date.getDate()}`;
+        }),
+        datasets: [
+          {
+            data: metrics.slice(0, 6).reverse().map((m) => m.avg_clarity),
+            color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
+            strokeWidth: 2,
+          },
+        ],
+      }
+    : { labels: [], datasets: [{ data: [] }] };
+
+  return (
+    <ScrollView className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="bg-primary-500 pt-16 pb-8 px-6">
+        <Text className="text-white text-3xl font-bold mb-2">Profile</Text>
+        <Text className="text-white/90 text-base">{user?.email}</Text>
+      </View>
+
+      {/* Stats Overview */}
+      {progress && (
+        <View className="px-4 -mt-6 mb-4">
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
+            <View className="flex-row justify-around">
+              <View className="items-center">
+                <Text className="text-3xl font-bold text-primary-500">
+                  {progress.current_streak}
+                </Text>
+                <Text className="text-gray-500 text-sm mt-1">Day Streak</Text>
+              </View>
+              <View className="items-center">
+                <Text className="text-3xl font-bold text-primary-500">
+                  {progress.total_sessions}
+                </Text>
+                <Text className="text-gray-500 text-sm mt-1">Total Sessions</Text>
+              </View>
+              <View className="items-center">
+                <Text className="text-3xl font-bold text-primary-500">
+                  {progress.average_scores.clarity.toFixed(1)}
+                </Text>
+                <Text className="text-gray-500 text-sm mt-1">Avg Clarity</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Weekly Progress Chart */}
+      {metrics && metrics.length > 0 && (
+        <View className="px-4 mb-4">
+          <ProgressChart
+            data={weeklyData}
+            title="Weekly Clarity Trend"
+            yAxisSuffix=""
+          />
+        </View>
+      )}
+
+      {/* Recent Sessions */}
+      {progress && progress.recent_sessions && progress.recent_sessions.length > 0 && (
+        <View className="px-4 mb-4">
+          <View className="bg-white rounded-2xl p-4 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-900 mb-3">
+              Recent Sessions
+            </Text>
+            {progress.recent_sessions.slice(0, 5).map((session: any) => (
+              <TouchableOpacity
+                key={session.id}
+                onPress={() => router.push({
+                  pathname: '/feedback',
+                  params: { sessionId: session.id },
+                })}
+                className="py-3 border-b border-gray-100"
+              >
+                <Text className="text-gray-900 font-medium mb-1">
+                  {session.scenarios?.title || 'Practice Session'}
+                </Text>
+                <Text className="text-gray-500 text-sm">
+                  {new Date(session.created_at).toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Account Actions */}
+      <View className="px-4 mb-8">
+        <View className="bg-white rounded-2xl p-4 shadow-sm">
+          <Text className="text-lg font-semibold text-gray-900 mb-3">
+            Account
+          </Text>
+
+          <TouchableOpacity className="py-3 border-b border-gray-100">
+            <Text className="text-gray-700">Settings</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="py-3 border-b border-gray-100">
+            <Text className="text-gray-700">Privacy Policy</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="py-3 border-b border-gray-100">
+            <Text className="text-gray-700">Terms of Service</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleSignOut} className="py-3">
+            <Text className="text-red-500 font-medium">Sign Out</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
