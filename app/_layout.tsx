@@ -2,9 +2,11 @@ import '../global.css';
 import { useEffect } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { queryClient } from '@/config/react-query';
 import { useAuth } from '@/hooks';
 import { View, ActivityIndicator } from 'react-native';
+import { ErrorBoundary, ToastProvider, setGlobalToast, useToast } from '@/components';
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -38,12 +40,30 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function ToastInitializer({ children }: { children: React.ReactNode }) {
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    setGlobalToast(showToast);
+  }, [showToast]);
+
+  return <>{children}</>;
+}
+
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Slot />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            <ToastInitializer>
+              <AuthProvider>
+                <Slot />
+              </AuthProvider>
+            </ToastInitializer>
+          </ToastProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

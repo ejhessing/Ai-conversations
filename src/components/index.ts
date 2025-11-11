@@ -5,3 +5,6 @@ export * from './FeedbackCard';
 export * from './ScenarioPicker';
 export * from './ProgressChart';
 export * from './Skeleton';
+export * from './ErrorBoundary';
+export * from './Toast';
+export * from './BadgeCard';

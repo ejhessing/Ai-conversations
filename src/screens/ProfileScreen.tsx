@@ -6,9 +6,10 @@ import {
   ProgressChart,
   ProgressChartSkeleton,
   ProgressStatsSkeleton,
-  SessionHistorySkeleton
+  SessionHistorySkeleton,
+  BadgeGrid,
 } from '@/components';
-import { useAuth, useUserProgress } from '@/hooks';
+import { useAuth, useUserProgress, useBadges, useUserBadges } from '@/hooks';
 import { fetchUserMetrics } from '@/services/api';
 import { useQuery } from '@tanstack/react-query';
 
@@ -16,6 +17,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
   const { data: progress, isLoading: progressLoading } = useUserProgress(user?.id);
+  const { data: badges } = useBadges();
+  const { data: userBadges } = useUserBadges(user?.id);
 
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['metrics', user?.id],
@@ -154,6 +157,27 @@ export default function ProfileScreen() {
         ) : null}
       </View>
 
+      {/* Badges */}
+      {badges && badges.length > 0 && (
+        <View className="px-4 mb-4">
+          <View className="bg-white rounded-2xl p-4 shadow-sm">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-lg font-semibold text-gray-900">
+                Achievements
+              </Text>
+              <Text className="text-sm text-gray-500">
+                {userBadges?.length || 0}/{badges.length}
+              </Text>
+            </View>
+
+            <BadgeGrid
+              badges={badges}
+              earnedBadgeIds={new Set(userBadges?.map(ub => ub.badge_id) || [])}
+            />
+          </View>
+        </View>
+      )}
+
       {/* Account Actions */}
       <View className="px-4 mb-8">
         <View className="bg-white rounded-2xl p-4 shadow-sm">
@@ -161,7 +185,10 @@ export default function ProfileScreen() {
             Account
           </Text>
 
-          <TouchableOpacity className="py-3 border-b border-gray-100">
+          <TouchableOpacity
+            className="py-3 border-b border-gray-100"
+            onPress={() => router.push('/settings')}
+          >
             <Text className="text-gray-700">Settings</Text>
           </TouchableOpacity>
 

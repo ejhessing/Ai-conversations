@@ -256,3 +256,98 @@ export async function fetchUserProgress(userId: string) {
     recent_sessions: sessionsData.slice(0, 10),
   };
 }
+
+/**
+ * Fetch all available badges
+ */
+export async function fetchBadges() {
+  const { data, error } = await supabase
+    .from('badges')
+    .select('*')
+    .order('required_sessions', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+/**
+ * Fetch user's earned badges with badge details
+ */
+export async function fetchUserBadges(userId: string) {
+  const { data, error } = await supabase
+    .from('user_badges')
+    .select('*, badges(*)')
+    .eq('user_id', userId)
+    .order('earned_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+/**
+ * Award a badge to a user
+ */
+export async function awardBadge(userId: string, badgeId: string) {
+  const { data, error } = await supabase
+    .from('user_badges')
+    .insert({
+      user_id: userId,
+      badge_id: badgeId,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Check and award badges based on user progress
+ * This should be called after completing a session
+ */
+export async function checkAndAwardBadges(userId: string) {
+  try {
+    // Fetch user progress and badges
+    const [progress, allBadges, earnedBadges] = await Promise.all([
+      fetchUserProgress(userId),
+      fetchBadges(),
+      fetchUserBadges(userId),
+    ]);
+
+    const earnedBadgeIds = new Set(earnedBadges.map(ub => ub.badge_id));
+    const newlyEarnedBadges = [];
+
+    // Check each badge requirement
+    for (const badge of allBadges) {
+      // Skip if already earned
+      if (earnedBadgeIds.has(badge.id)) continue;
+
+      let shouldAward = false;
+
+      // Check based on badge type
+      if (badge.type === 'session_count') {
+        shouldAward = progress.total_sessions >= badge.required_sessions;
+      } else if (badge.type === 'streak') {
+        shouldAward = progress.current_streak >= badge.required_streak;
+      } else if (badge.type === 'score') {
+        const avgScore = (
+          progress.average_scores.clarity +
+          progress.average_scores.confidence +
+          progress.average_scores.empathy +
+          progress.average_scores.pacing
+        ) / 4;
+        shouldAward = avgScore >= badge.required_score;
+      }
+
+      if (shouldAward) {
+        await awardBadge(userId, badge.id);
+        newlyEarnedBadges.push(badge);
+      }
+    }
+
+    return newlyEarnedBadges;
+  } catch (error) {
+    console.error('Error checking badges:', error);
+    return [];
+  }
+}

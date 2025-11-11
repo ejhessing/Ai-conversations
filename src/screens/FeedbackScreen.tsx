@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { View, Text, Alert, Share, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { FeedbackCard, Button, FeedbackCardSkeleton } from '@/components';
-import { useFeedback } from '@/hooks';
+import { FeedbackCard, Button, FeedbackCardSkeleton, toast } from '@/components';
+import { useFeedback, useCheckBadges, useAuth } from '@/hooks';
 import { fetchUserSessions } from '@/services/api';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/config/supabase';
@@ -11,8 +11,10 @@ import { generateFeedbackSummary, generateMarkdownReport } from '@/utils';
 export default function FeedbackScreen() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams();
+  const { user } = useAuth();
 
   const { feedback, isLoading, error, generateFeedback } = useFeedback(sessionId as string);
+  const checkBadgesMutation = useCheckBadges();
 
   // Fetch session details
   const { data: sessions } = useQuery({
@@ -48,6 +50,28 @@ export default function FeedbackScreen() {
     generateIfNeeded();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, feedback, isLoading]); // generateFeedback is stable from mutation
+
+  // Check for newly earned badges after feedback is loaded
+  useEffect(() => {
+    const checkBadges = async () => {
+      if (feedback && user?.id && !checkBadgesMutation.isPending) {
+        try {
+          const newBadges = await checkBadgesMutation.mutateAsync(user.id);
+          if (newBadges && newBadges.length > 0) {
+            // Show toast for each new badge
+            newBadges.forEach((badge: any) => {
+              toast.success(`🎉 Badge earned: ${badge.name}!`, 5000);
+            });
+          }
+        } catch (err) {
+          console.error('Error checking badges:', err);
+        }
+      }
+    };
+
+    checkBadges();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feedback, user?.id]); // checkBadgesMutation is stable
 
   const handleGoHome = () => {
     router.push('/');
