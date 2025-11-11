@@ -156,7 +156,7 @@ function ToastItem({ toast, onHide }: { toast: Toast; onHide: (id: string) => vo
       case 'info':
       default:
         return {
-          bg: 'bg-blue-500',
+          bg: 'bg-info-500',
           text: 'text-white',
           icon: 'ℹ',
         };

@@ -144,6 +144,10 @@ export default function ProfileScreen() {
                   params: { sessionId: session.id },
                 })}
                 className="py-3 border-b border-gray-100"
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`Session: ${session.scenarios?.title || 'Practice Session'}`}
+                accessibilityHint="Tap to view session details and feedback"
               >
                 <Text className="text-gray-900 font-medium mb-1">
                   {session.scenarios?.title || 'Practice Session'}
@@ -188,19 +192,42 @@ export default function ProfileScreen() {
           <TouchableOpacity
             className="py-3 border-b border-gray-100"
             onPress={() => router.push('/settings')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            accessibilityHint="Tap to open app settings"
           >
             <Text className="text-gray-700">Settings</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="py-3 border-b border-gray-100">
+          <TouchableOpacity
+            className="py-3 border-b border-gray-100"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Privacy Policy"
+            accessibilityHint="Tap to view privacy policy"
+          >
             <Text className="text-gray-700">Privacy Policy</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="py-3 border-b border-gray-100">
+          <TouchableOpacity
+            className="py-3 border-b border-gray-100"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Terms of Service"
+            accessibilityHint="Tap to view terms of service"
+          >
             <Text className="text-gray-700">Terms of Service</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleSignOut} className="py-3">
+          <TouchableOpacity
+            onPress={handleSignOut}
+            className="py-3"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Sign Out"
+            accessibilityHint="Tap to sign out of your account"
+          >
             <Text className="text-red-500 font-medium">Sign Out</Text>
           </TouchableOpacity>
         </View>

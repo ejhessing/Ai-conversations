@@ -72,7 +72,14 @@ export default function SettingsScreen() {
     <ScrollView className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="bg-primary-500 pt-16 pb-8 px-6">
-        <TouchableOpacity onPress={() => router.back()} className="mb-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mb-4"
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          accessibilityHint="Tap to go back to previous screen"
+        >
           <Text className="text-white text-base">← Back</Text>
         </TouchableOpacity>
         <Text className="text-white text-3xl font-bold">Settings</Text>
@@ -103,6 +110,9 @@ export default function SettingsScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
+              accessibilityLabel="Push Notifications"
+              accessibilityHint="Toggle to enable or disable push notifications"
+              accessibilityRole="switch"
             />
           </View>
 
@@ -117,6 +127,10 @@ export default function SettingsScreen() {
               value={practiceReminders}
               onValueChange={setPracticeReminders}
               disabled={!notificationsEnabled}
+              accessibilityLabel="Practice Reminders"
+              accessibilityHint="Toggle to enable or disable daily practice reminders"
+              accessibilityRole="switch"
+              accessibilityState={{ disabled: !notificationsEnabled }}
             />
           </View>
         </View>
@@ -136,7 +150,13 @@ export default function SettingsScreen() {
                 Play sounds for interactions
               </Text>
             </View>
-            <Switch value={soundEnabled} onValueChange={setSoundEnabled} />
+            <Switch
+              value={soundEnabled}
+              onValueChange={setSoundEnabled}
+              accessibilityLabel="Sound Effects"
+              accessibilityHint="Toggle to enable or disable sound effects"
+              accessibilityRole="switch"
+            />
           </View>
 
           <View className="flex-row justify-between items-center py-3">
@@ -146,7 +166,13 @@ export default function SettingsScreen() {
                 Automatically play AI voice responses
               </Text>
             </View>
-            <Switch value={autoPlayAudio} onValueChange={setAutoPlayAudio} />
+            <Switch
+              value={autoPlayAudio}
+              onValueChange={setAutoPlayAudio}
+              accessibilityLabel="Auto-play AI Responses"
+              accessibilityHint="Toggle to automatically play AI voice responses"
+              accessibilityRole="switch"
+            />
           </View>
         </View>
       </View>
@@ -158,17 +184,33 @@ export default function SettingsScreen() {
             Data & Privacy
           </Text>
 
-          <TouchableOpacity className="py-3 border-b border-gray-100">
+          <TouchableOpacity
+            className="py-3 border-b border-gray-100"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Privacy Policy"
+            accessibilityHint="Tap to view privacy policy"
+          >
             <Text className="text-gray-900 font-medium">Privacy Policy</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="py-3 border-b border-gray-100">
+          <TouchableOpacity
+            className="py-3 border-b border-gray-100"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Terms of Service"
+            accessibilityHint="Tap to view terms of service"
+          >
             <Text className="text-gray-900 font-medium">Terms of Service</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="py-3 border-b border-gray-100"
             onPress={handleClearCache}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Clear Cache"
+            accessibilityHint="Tap to clear locally cached data and free up storage space"
           >
             <Text className="text-gray-900 font-medium">Clear Cache</Text>
             <Text className="text-sm text-gray-500 mt-1">
@@ -176,7 +218,14 @@ export default function SettingsScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="py-3" onPress={handleDeleteAccount}>
+          <TouchableOpacity
+            className="py-3"
+            onPress={handleDeleteAccount}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Delete Account"
+            accessibilityHint="Tap to permanently delete your account and all data"
+          >
             <Text className="text-red-500 font-medium">Delete Account</Text>
             <Text className="text-sm text-gray-500 mt-1">
               Permanently delete your account and data
@@ -197,11 +246,23 @@ export default function SettingsScreen() {
             <Text className="text-sm text-gray-500 mt-1">1.0.0</Text>
           </View>
 
-          <TouchableOpacity className="py-3 border-b border-gray-100">
+          <TouchableOpacity
+            className="py-3 border-b border-gray-100"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Help & Support"
+            accessibilityHint="Tap to access help and support resources"
+          >
             <Text className="text-gray-900 font-medium">Help & Support</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="py-3">
+          <TouchableOpacity
+            className="py-3"
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Rate Us"
+            accessibilityHint="Tap to rate this app in the app store"
+          >
             <Text className="text-gray-900 font-medium">Rate Us</Text>
           </TouchableOpacity>
         </View>

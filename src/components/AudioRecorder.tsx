@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { COLORS } from '@/utils/constants';
 import type { RecordingState } from '@/types';
 
 interface AudioRecorderProps {
@@ -48,7 +49,7 @@ export function AudioRecorder({
   if (isTranscribing) {
     return (
       <View className="items-center justify-center p-6">
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={COLORS.primary[500]} />
         <Text className="mt-4 text-gray-600">Transcribing your speech...</Text>
       </View>
     );
@@ -81,7 +82,7 @@ export function AudioRecorder({
       )}
 
       {/* Control Buttons */}
-      <View className="flex-row items-center space-x-4">
+      <View className="flex-row items-center">
         {/* Record/Pause Button */}
         <TouchableOpacity
           onPress={handleRecordPress}
@@ -89,16 +90,31 @@ export function AudioRecorder({
             isRecording && !isPaused
               ? 'bg-yellow-500'
               : 'bg-primary-500'
-          }`}
+          } ${isRecording ? 'mr-4' : ''}`}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={
+            !isRecording
+              ? 'Start recording'
+              : isPaused
+              ? 'Resume recording'
+              : 'Pause recording'
+          }
+          accessibilityHint={
+            !isRecording
+              ? 'Tap to start recording your voice'
+              : isPaused
+              ? 'Tap to resume recording'
+              : 'Tap to pause recording'
+          }
         >
           {!isRecording ? (
             <View className="w-6 h-6 rounded-full bg-white" />
           ) : isPaused ? (
             <Text className="text-white text-2xl">▶</Text>
           ) : (
-            <View className="flex-row space-x-1">
-              <View className="w-1.5 h-6 bg-white rounded" />
+            <View className="flex-row">
+              <View className="w-1.5 h-6 bg-white rounded mr-1" />
               <View className="w-1.5 h-6 bg-white rounded" />
             </View>
           )}
@@ -108,8 +124,11 @@ export function AudioRecorder({
         {isRecording && (
           <TouchableOpacity
             onPress={handleStopPress}
-            className="w-16 h-16 rounded-full bg-red-500 items-center justify-center ml-4"
+            className="w-16 h-16 rounded-full bg-red-500 items-center justify-center"
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Stop recording"
+            accessibilityHint="Tap to finish and save your recording"
           >
             <View className="w-5 h-5 bg-white rounded-sm" />
           </TouchableOpacity>

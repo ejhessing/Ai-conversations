@@ -159,7 +159,7 @@ export default function FeedbackScreen() {
       <FeedbackCard feedback={feedback} />
 
       {/* Action Buttons */}
-      <View className="p-4 bg-white border-t border-gray-200 space-y-2">
+      <View className="p-4 bg-white border-t border-gray-200">
         <View className="flex-row gap-2 mb-2">
           <View className="flex-1">
             <Button
@@ -178,11 +178,13 @@ export default function FeedbackScreen() {
             />
           </View>
         </View>
-        <Button
-          title="Practice Another Scenario"
-          onPress={handlePracticeAgain}
-          size="large"
-        />
+        <View className="mb-2">
+          <Button
+            title="Practice Another Scenario"
+            onPress={handlePracticeAgain}
+            size="large"
+          />
+        </View>
         <Button
           title="Back to Home"
           onPress={handleGoHome}

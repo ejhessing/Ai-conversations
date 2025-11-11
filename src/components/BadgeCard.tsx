@@ -32,15 +32,15 @@ export function BadgeCard({ badge, earned = false, earnedAt, compact = false }: 
 
     switch (badge.tier) {
       case 'bronze':
-        return 'bg-orange-400';
+        return 'bg-bronze-400';
       case 'silver':
-        return 'bg-gray-400';
+        return 'bg-silver-400';
       case 'gold':
-        return 'bg-yellow-400';
+        return 'bg-gold-400';
       case 'platinum':
-        return 'bg-purple-400';
+        return 'bg-platinum-400';
       default:
-        return 'bg-blue-400';
+        return 'bg-info-400';
     }
   };
 
@@ -147,16 +147,17 @@ export function BadgeList({
   const earnedBadgeMap = new Map(userBadges.map((ub) => [ub.badge_id, ub.earned_at]));
 
   return (
-    <View className="space-y-3">
-      {badges.map((badge) => {
+    <View>
+      {badges.map((badge, index) => {
         const earnedAt = earnedBadgeMap.get(badge.id);
         return (
-          <BadgeCard
-            key={badge.id}
-            badge={badge}
-            earned={!!earnedAt}
-            earnedAt={earnedAt}
-          />
+          <View key={badge.id} className={index < badges.length - 1 ? 'mb-3' : ''}>
+            <BadgeCard
+              badge={badge}
+              earned={!!earnedAt}
+              earnedAt={earnedAt}
+            />
+          </View>
         );
       })}
     </View>
@@ -172,7 +173,7 @@ export function BadgeNotification({ badge }: { badge: Badge }) {
     <View className="bg-white rounded-2xl p-6 shadow-xl items-center">
       <Text className="text-2xl font-bold text-gray-900 mb-2">🎉 Badge Earned!</Text>
 
-      <View className="w-24 h-24 rounded-full bg-yellow-400 items-center justify-center shadow-lg mb-3">
+      <View className="w-24 h-24 rounded-full bg-gold-400 items-center justify-center shadow-lg mb-3">
         <Text className="text-6xl">
           {badge.type === 'session_count' ? '🎯' : badge.type === 'streak' ? '🔥' : '⭐'}
         </Text>

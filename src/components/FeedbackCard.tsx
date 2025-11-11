@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS } from '@/utils/constants';
 import type { Feedback } from '@/types';
 
 interface FeedbackCardProps {
@@ -9,15 +10,15 @@ interface FeedbackCardProps {
 
 export function FeedbackCard({ feedback }: FeedbackCardProps) {
   const getScoreColor = (score: number) => {
-    if (score >= 8) return 'text-green-600';
-    if (score >= 6) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 8) return 'text-success-600';
+    if (score >= 6) return 'text-warning-600';
+    return 'text-danger-600';
   };
 
   const getScoreBg = (score: number) => {
-    if (score >= 8) return 'bg-green-100';
-    if (score >= 6) return 'bg-yellow-100';
-    return 'bg-red-100';
+    if (score >= 8) return 'bg-success-100';
+    if (score >= 6) return 'bg-warning-100';
+    return 'bg-danger-100';
   };
 
   return (
@@ -92,12 +93,12 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
 
       {/* Strengths */}
       <View className="mx-4 mb-4 p-4 bg-white rounded-2xl shadow-sm">
-        <Text className="text-lg font-semibold text-green-700 mb-3">
+        <Text className="text-lg font-semibold text-success-700 mb-3">
           ✓ What You Did Well
         </Text>
         {feedback.strengths.map((strength, index) => (
           <View key={index} className="flex-row mb-2">
-            <Text className="text-green-600 mr-2">•</Text>
+            <Text className="text-success-600 mr-2">•</Text>
             <Text className="flex-1 text-gray-700">{strength}</Text>
           </View>
         ))}
@@ -105,26 +106,31 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
 
       {/* Improvements */}
       <View className="mx-4 mb-4 p-4 bg-white rounded-2xl shadow-sm">
-        <Text className="text-lg font-semibold text-orange-700 mb-3">
+        <Text className="text-lg font-semibold text-bronze-700 mb-3">
           ⚡ Areas to Improve
         </Text>
         {feedback.improvements.map((improvement, index) => (
           <View key={index} className="flex-row mb-2">
-            <Text className="text-orange-600 mr-2">•</Text>
+            <Text className="text-bronze-600 mr-2">•</Text>
             <Text className="flex-1 text-gray-700">{improvement}</Text>
           </View>
         ))}
       </View>
 
       {/* Practice Drill */}
-      <View className="mx-4 mb-6 p-4 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-sm">
+      <LinearGradient
+        colors={[COLORS.primary[500], COLORS.primary[700]]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="mx-4 mb-6 p-4 rounded-2xl shadow-sm"
+      >
         <Text className="text-lg font-semibold text-white mb-2">
           🎯 Practice Drill
         </Text>
-        <Text className="text-white/90 leading-6">
+        <Text className="text-white opacity-90 leading-6">
           {feedback.practice_drill}
         </Text>
-      </View>
+      </LinearGradient>
     </ScrollView>
   );
 }

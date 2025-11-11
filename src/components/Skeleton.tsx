@@ -175,9 +175,9 @@ export function ProgressStatsSkeleton() {
 
       {/* Average Scores */}
       <Skeleton width={130} height={20} className="mb-3" />
-      <View className="space-y-3">
+      <View>
         {[1, 2, 3, 4].map((i) => (
-          <View key={i}>
+          <View key={i} className={i < 4 ? 'mb-3' : ''}>
             <View className="flex-row justify-between mb-1">
               <Skeleton width={80} height={16} />
               <Skeleton width={50} height={16} />
