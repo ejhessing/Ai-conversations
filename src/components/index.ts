@@ -8,3 +8,4 @@ export * from './Skeleton';
 export * from './ErrorBoundary';
 export * from './Toast';
 export * from './BadgeCard';
+export * from './Card';

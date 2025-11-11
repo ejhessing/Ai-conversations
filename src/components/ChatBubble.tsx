@@ -78,6 +78,23 @@ export function ChatBubble({ message }: ChatBubbleProps) {
             onPress={playAudio}
             className="mt-2 flex-row items-center"
             disabled={audioError}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isPlaying
+                ? 'Pause audio'
+                : audioError
+                ? 'Audio unavailable'
+                : 'Play audio'
+            }
+            accessibilityHint={
+              audioError
+                ? undefined
+                : isPlaying
+                ? 'Tap to pause audio playback'
+                : 'Tap to play the message audio'
+            }
+            accessibilityState={{ disabled: audioError }}
           >
             <View className={`w-6 h-6 rounded-full ${isUser ? 'bg-white/20' : 'bg-gray-300'} items-center justify-center`}>
               <Text className={isUser ? 'text-white' : 'text-gray-700'}>

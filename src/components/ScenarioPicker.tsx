@@ -16,11 +16,11 @@ export function ScenarioPicker({
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return { bg: 'bg-green-100', text: 'text-green-700' };
+        return { bg: 'bg-success-100', text: 'text-success-700' };
       case 'intermediate':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-700' };
+        return { bg: 'bg-warning-100', text: 'text-warning-700' };
       case 'advanced':
-        return { bg: 'bg-red-100', text: 'text-red-700' };
+        return { bg: 'bg-danger-100', text: 'text-danger-700' };
       default:
         return { bg: 'bg-gray-100', text: 'text-gray-700' };
     }
@@ -40,8 +40,8 @@ export function ScenarioPicker({
           Select a conversation scenario to practice
         </Text>
 
-        <View className="space-y-3">
-          {scenarios.map((scenario) => {
+        <View>
+          {scenarios.map((scenario, index) => {
             const isSelected = selectedScenario?.id === scenario.id;
             const difficultyStyle = getDifficultyColor(scenario.difficulty);
 
@@ -53,8 +53,12 @@ export function ScenarioPicker({
                   isSelected
                     ? 'border-primary-500 bg-primary-50'
                     : 'border-gray-200 bg-white'
-                }`}
+                } ${index < scenarios.length - 1 ? 'mb-3' : ''}`}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`${scenario.title}, ${getDifficultyLabel(scenario.difficulty)} difficulty`}
+                accessibilityHint={`Tap to select this scenario. ${scenario.context}`}
+                accessibilityState={{ selected: isSelected }}
               >
                 {/* Header */}
                 <View className="flex-row justify-between items-start mb-2">

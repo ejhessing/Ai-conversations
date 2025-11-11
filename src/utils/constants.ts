@@ -67,46 +67,75 @@ export const DIFFICULTY_LEVELS = {
   ADVANCED: 'advanced',
 } as const;
 
+// Design System Color Constants (for React Native components that need hex/rgb values)
+export const COLORS = {
+  primary: {
+    50: '#eef2ff',
+    100: '#e0e7ff',
+    200: '#c7d2fe',
+    300: '#a5b4fc',
+    400: '#818cf8',
+    500: '#6366f1',
+    600: '#4f46e5',
+    700: '#4338ca',
+    800: '#3730a3',
+    900: '#312e81',
+  },
+  white: '#ffffff',
+  black: '#000000',
+  gray: {
+    100: '#f3f4f6',
+    200: '#e5e7eb',
+    300: '#d1d5db',
+    400: '#9ca3af',
+    500: '#6b7280',
+    600: '#4b5563',
+    700: '#374151',
+    800: '#1f2937',
+    900: '#111827',
+  },
+} as const;
+
 // Difficulty Colors (for UI)
 export const DIFFICULTY_COLORS = {
   beginner: {
-    bg: 'bg-green-100',
-    text: 'text-green-700',
-    border: 'border-green-500',
+    bg: 'bg-success-100',
+    text: 'text-success-700',
+    border: 'border-success-500',
   },
   intermediate: {
-    bg: 'bg-yellow-100',
-    text: 'text-yellow-700',
-    border: 'border-yellow-500',
+    bg: 'bg-warning-100',
+    text: 'text-warning-700',
+    border: 'border-warning-500',
   },
   advanced: {
-    bg: 'bg-red-100',
-    text: 'text-red-700',
-    border: 'border-red-500',
+    bg: 'bg-danger-100',
+    text: 'text-danger-700',
+    border: 'border-danger-500',
   },
 } as const;
 
 // Score Colors (for UI)
 export const SCORE_COLORS = {
   excellent: {
-    bg: 'bg-green-100',
-    text: 'text-green-700',
-    bar: 'bg-green-500',
+    bg: 'bg-success-100',
+    text: 'text-success-700',
+    bar: 'bg-success-500',
   },
   good: {
-    bg: 'bg-yellow-100',
-    text: 'text-yellow-700',
-    bar: 'bg-yellow-500',
+    bg: 'bg-warning-100',
+    text: 'text-warning-700',
+    bar: 'bg-warning-500',
   },
   fair: {
-    bg: 'bg-orange-100',
-    text: 'text-orange-700',
-    bar: 'bg-orange-500',
+    bg: 'bg-bronze-100',
+    text: 'text-bronze-700',
+    bar: 'bg-bronze-500',
   },
   poor: {
-    bg: 'bg-red-100',
-    text: 'text-red-700',
-    bar: 'bg-red-500',
+    bg: 'bg-danger-100',
+    text: 'text-danger-700',
+    bar: 'bg-danger-500',
   },
 } as const;
 

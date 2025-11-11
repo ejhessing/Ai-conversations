@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, View } from 'react-native';
+import { COLORS } from '@/utils/constants';
 
 interface ButtonProps {
   title: string;
@@ -33,7 +34,7 @@ export function Button({
       case 'outline':
         return 'bg-transparent border-2 border-primary-500';
       case 'danger':
-        return 'bg-red-500';
+        return 'bg-danger-500';
       default:
         return 'bg-primary-500';
     }
@@ -83,10 +84,13 @@ export function Button({
       disabled={disabled || loading}
       className={`rounded-xl flex-row items-center justify-center ${getVariantStyles()} ${getSizeStyles()}`}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: disabled || loading }}
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'outline' ? '#6366f1' : '#ffffff'}
+          color={variant === 'outline' ? COLORS.primary[500] : COLORS.white}
         />
       ) : (
         <>

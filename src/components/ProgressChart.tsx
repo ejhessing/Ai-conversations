@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { COLORS } from '@/utils/constants';
 
 interface ProgressChartProps {
   data: {
@@ -48,7 +49,7 @@ export function ProgressChart({ data, title, yAxisSuffix = '' }: ProgressChartPr
             propsForDots: {
               r: '6',
               strokeWidth: '2',
-              stroke: '#6366f1',
+              stroke: COLORS.primary[500],
             },
           }}
           bezier
@@ -91,7 +92,7 @@ export function ProgressStats({
       {/* Streak and Sessions */}
       <View className="flex-row justify-around mb-6 pb-6 border-b border-gray-200">
         <View className="items-center">
-          <View className="bg-orange-100 w-16 h-16 rounded-full items-center justify-center mb-2">
+          <View className="bg-bronze-100 w-16 h-16 rounded-full items-center justify-center mb-2">
             <Text className="text-3xl">🔥</Text>
           </View>
           <Text className="text-2xl font-bold text-gray-900">
@@ -115,10 +116,16 @@ export function ProgressStats({
       <Text className="text-lg font-semibold text-gray-900 mb-3">
         Average Scores
       </Text>
-      <View className="space-y-3">
-        <ScoreBar label="Clarity" score={averageScores.clarity} />
-        <ScoreBar label="Confidence" score={averageScores.confidence} />
-        <ScoreBar label="Empathy" score={averageScores.empathy} />
+      <View>
+        <View className="mb-3">
+          <ScoreBar label="Clarity" score={averageScores.clarity} />
+        </View>
+        <View className="mb-3">
+          <ScoreBar label="Confidence" score={averageScores.confidence} />
+        </View>
+        <View className="mb-3">
+          <ScoreBar label="Empathy" score={averageScores.empathy} />
+        </View>
         <ScoreBar label="Pacing" score={averageScores.pacing} />
       </View>
     </View>
@@ -137,7 +144,7 @@ function ScoreBar({ label, score }: ScoreBarProps) {
 
   const percentage = (clampedScore / 10) * 100;
   const barColor =
-    clampedScore >= 8 ? 'bg-green-500' : clampedScore >= 6 ? 'bg-yellow-500' : 'bg-red-500';
+    clampedScore >= 8 ? 'bg-success-500' : clampedScore >= 6 ? 'bg-warning-500' : 'bg-danger-500';
 
   return (
     <View>
