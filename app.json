@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "AI Conversation Coach",
+    "slug": "ai-conversation-coach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6366f1"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aiconversationcoach.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app needs access to your microphone to record your voice for conversation practice.",
+        "NSSpeechRecognitionUsageDescription": "This app uses speech recognition to analyze your conversation."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6366f1"
+      },
+      "package": "com.aiconversationcoach.app",
+      "permissions": [
+        "RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow AI Conversation Coach to access your microphone for recording conversations."
+        }
+      ]
+    ],
+    "scheme": "ai-conversation-coach",
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}
